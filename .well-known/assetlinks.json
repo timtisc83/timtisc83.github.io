@@ -1,1 +1,12 @@
-
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "io.github.timtisc83.erplooptape",
+      "sha256_cert_fingerprints": [
+        "53:D2:1B:77:D4:D3:35:17:70:43:A5:F8:D2:43:9A:BB:57:4F:22:A8:41:74:E0:40:2A:91:BB:4E:51:23:CD:E3"
+      ]
+    }
+  }
+]
