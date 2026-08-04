@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#f7f7fa">
+<meta name="apple-mobile-web-app-title" content="ERP Loop Tape">
+<meta name="application-name" content="ERP Loop Tape">
+<link rel="manifest" href="./manifest.json">
+<title>ERP Loop Tape</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#f7f7fa;--surface:#fff;--surface2:#e8e8ee;
+  --accent:#e94560;--text:#1a1a2e;--text2:#6b6b80;
+  --green:#2fa88a;--radius:12px;
+}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100dvh;display:flex;flex-direction:column;overflow-x:hidden;-webkit-tap-highlight-color:transparent}
+header{padding:12px 20px 0;display:flex;align-items:center;justify-content:space-between}
+header .title{text-align:center;flex:1}
+header h1{font-size:20px;font-weight:700;letter-spacing:-.5px}
+header p{font-size:11px;color:var(--text2);margin-top:1px}
+.lang-btn{background:var(--surface);border:1px solid var(--surface2);color:var(--text);border-radius:8px;padding:6px 10px;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0}
+
+.disc-overlay{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;flex-direction:column;align-items:center;padding:24px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.disc-overlay.hidden{display:none}
+.disc-box{max-width:420px;width:100%;background:var(--surface);border-radius:16px;padding:28px 24px;text-align:left;margin:auto 0;flex-shrink:0;border:1px solid var(--surface2);box-shadow:0 4px 20px rgba(0,0,0,.08)}
+.disc-box h2{font-size:18px;font-weight:700;margin-bottom:16px;text-align:center}
+.disc-box .ico{text-align:center;font-size:40px;margin-bottom:12px}
+.disc-box p{font-size:13px;line-height:1.6;color:var(--text2);margin-bottom:12px}
+.disc-box p strong{color:var(--text)}
+.disc-box ul{font-size:13px;line-height:1.6;color:var(--text2);margin:0 0 16px 18px}
+.disc-box ul li{margin-bottom:4px}
+.disc-accept{width:100%;padding:14px;border:none;border-radius:10px;background:var(--green);color:#fff;font-size:15px;font-weight:700;cursor:pointer;margin-top:8px;-webkit-appearance:none;touch-action:manipulation}
+
+.tabs{display:flex;margin:10px 20px 0;background:var(--surface);border-radius:var(--radius);overflow:hidden;border:1px solid var(--surface2)}
+.tab{flex:1;padding:10px;text-align:center;font-size:13px;font-weight:600;cursor:pointer;color:var(--text2);border:none;background:transparent;transition:background .2s}
+.tab.active{background:var(--accent);color:#fff}
+
+.panel{display:none;flex:1;flex-direction:column;padding:14px 20px 100px;overflow-y:auto}
+.panel.active{display:flex}
+
+.record-area{display:flex;flex-direction:column;align-items:center;gap:6px;margin-bottom:14px}
+.rec-btn{width:60px;height:60px;border-radius:50%;border:3px solid var(--accent);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.rec-btn .dot{width:26px;height:26px;background:var(--accent);border-radius:50%;transition:all .2s}
+.rec-btn.recording .dot{border-radius:4px;width:20px;height:20px}
+.rec-btn.recording{border-color:#ff6b6b;animation:pulse 1.2s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(233,69,96,.4)}50%{box-shadow:0 0 0 12px rgba(233,69,96,0)}}
+.rec-label{font-size:11px;color:var(--text2)}
+.name-input{background:var(--surface);border:1px solid var(--surface2);border-radius:8px;padding:7px 10px;color:var(--text);font-size:13px;width:100%;max-width:240px;text-align:center}
+
+.item-list{display:flex;flex-direction:column;gap:8px}
+.item-card{background:var(--surface);border-radius:var(--radius);padding:10px 12px;display:flex;align-items:center;gap:8px;border:1px solid var(--surface2);box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.item-card .info{flex:1;min-width:0}
+.item-card .info .name{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;padding:2px 4px;border-radius:4px;border:1px solid transparent}
+.item-card .info .name:hover{border-color:var(--surface2)}
+.item-card .info .name-edit{font-size:14px;font-weight:500;width:100%;background:var(--bg);border:1px solid var(--accent);border-radius:4px;padding:2px 4px;color:var(--text);font-family:inherit}
+.item-card .info .meta{font-size:11px;color:var(--text2);margin-top:1px}
+
+.toggle{width:40px;height:22px;background:#d5d5dd;border-radius:11px;cursor:pointer;position:relative;flex-shrink:0;transition:background .2s;border:none}
+.toggle.on{background:var(--green)}
+.toggle::after{content:'';position:absolute;top:2px;left:2px;width:18px;height:18px;background:#fff;border-radius:50%;transition:transform .2s}
+.toggle.on::after{transform:translateX(18px)}
+
+.icon-btn{width:30px;height:30px;border-radius:8px;border:none;background:var(--surface2);color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.icon-btn.danger{background:#f6d2d2;color:#a11}
+
+.play-bar{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--surface2);padding:10px 20px;display:flex;align-items:center;gap:10px;z-index:100;box-shadow:0 -2px 8px rgba(0,0,0,.05)}
+.play-btn{width:46px;height:46px;border-radius:50%;border:none;background:var(--green);color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.play-btn.stop{background:var(--accent)}
+.play-bar .status{flex:1;font-size:12px;color:var(--text2);min-width:0}
+.play-bar .status .now{font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+.settings-section{background:var(--surface);border-radius:var(--radius);padding:12px 14px;margin-bottom:14px;border:1px solid var(--surface2)}
+.settings-section h3{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.setting-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.setting-row:last-child{margin-bottom:0}
+.setting-row label{font-size:13px}
+.setting-row input[type=range]{width:100%;accent-color:var(--accent)}
+.setting-row .val{font-size:12px;color:var(--green);font-weight:600;min-width:50px;text-align:right}
+.section-label{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.empty{text-align:center;color:var(--text2);font-size:13px;padding:24px 0}
+.bg-badge{display:none;font-size:10px;background:var(--green);color:#fff;padding:2px 8px;border-radius:10px;margin-left:8px;font-weight:600}
+.bg-badge.show{display:inline}
+input::placeholder{color:#9999aa}
+input:focus,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+</style>
+</head>
+<body>
+
+<div class="disc-overlay" id="discOverlay">
+  <div class="disc-box">
+    <div class="ico">&#9877;&#65039;</div>
+    <h2 id="dT">Important Notice</h2>
+    <p id="dP1"><strong>ERP Loop Tape is not a medical device and does not provide therapy, diagnosis, or treatment recommendations.</strong></p>
+    <p id="dP2">This app is a simple audio tool designed to support exposure exercises. It should only be used under the guidance of a qualified mental health professional.</p>
+    <ul>
+      <li id="dL1">Not a substitute for professional treatment</li>
+      <li id="dL2">No therapeutic or medical claims are made</li>
+      <li id="dL3">All data stays on your device</li>
+      <li id="dL4">Use at your own discretion and responsibility</li>
+    </ul>
+    <p id="dP3">If you are in crisis, please contact a mental health professional or emergency service immediately.</p>
+    <button class="disc-accept" id="discBtn">I understand &mdash; continue</button>
+  </div>
+</div>
+
+<header>
+  <div style="width:48px"></div>
+  <div class="title">
+    <h1>ERP Loop Tape <span class="bg-badge" id="bgBadge">BG</span></h1>
+    <p id="subtitle">Audio tool for exposure exercises</p>
+  </div>
+  <button class="lang-btn" id="langBtn">DE</button>
+</header>
+
+<div class="tabs">
+  <button class="tab active" data-tab="scripts" id="tabScripts">Long Expos</button>
+  <button class="tab" data-tab="short" id="tabShort">Short Expos</button>
+</div>
+
+<div class="panel active" id="panel-scripts">
+  <div class="record-area">
+    <input class="name-input" id="scriptName" placeholder="Name (optional)">
+    <button class="rec-btn" id="recBtn"><span class="dot"></span></button>
+    <span class="rec-label" id="recLabel">Tap to record</span>
+  </div>
+  <div class="section-label" id="lbl1">Your Expos</div>
+  <div class="item-list" id="scriptList"></div>
+  <div class="empty" id="scriptEmpty">No recordings yet.</div>
+</div>
+
+<div class="panel" id="panel-short">
+  <div class="record-area">
+    <input class="name-input" id="wordName" placeholder="Name (optional)">
+    <button class="rec-btn" id="recWordBtn"><span class="dot"></span></button>
+    <span class="rec-label" id="recWordLabel">Tap to record</span>
+  </div>
+  <div class="settings-section">
+    <h3 id="stTitle">Playback Settings</h3>
+    <div class="setting-row"><label id="stInterval">Mean interval</label></div>
+    <div class="setting-row">
+      <input type="range" id="intervalSlider" min="1" max="3600" value="10">
+      <span class="val" id="intervalVal">10s</span>
+    </div>
+    <div class="setting-row"><label id="stVariance">Variance</label></div>
+    <div class="setting-row">
+      <input type="range" id="varianceSlider" min="0" max="50" value="25">
+      <span class="val" id="varianceVal">&plusmn;25%</span>
+    </div>
+  </div>
+  <div class="section-label" id="lbl2">Your Short Expos</div>
+  <div class="item-list" id="wordList"></div>
+  <div class="empty" id="wordEmpty">No recordings yet.</div>
+</div>
+
+<div class="play-bar">
+  <button class="play-btn" id="playBtn">&#9654;</button>
+  <div class="status">
+    <div class="now" id="playNow">Ready</div>
+    <div id="playSub">Select items and press play</div>
+  </div>
+</div>
+
+<script>
+// ===== Storage =====
+function sG(k){try{return localStorage.getItem(k)}catch(e){return null}}
+function sS(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+function jG(k,d){try{const v=sG(k);return v?JSON.parse(v):d}catch(e){return d}}
+function jS(k,v){sS(k,JSON.stringify(v))}
+
+// ===== Service Worker Registration =====
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('./sw.js').catch(()=>{});
+}
+
+// ===== Wakelock =====
+let wakeLock=null;
+async function requestWake(){
+  try{if('wakeLock' in navigator){wakeLock=await navigator.wakeLock.request('screen');document.getElementById('bgBadge').classList.add('show')}}catch(e){}
+}
+function releaseWake(){
+  if(wakeLock){wakeLock.release().catch(()=>{});wakeLock=null}
+  document.getElementById('bgBadge').classList.remove('show');
+}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&isPlaying)requestWake()});
+
+// ===== MediaSession =====
+function setMediaSession(title,playing){
+  if(!('mediaSession' in navigator))return;
+  navigator.mediaSession.metadata=new MediaMetadata({title:title,artist:'ERP Loop Tape',album:'Exposure'});
+  navigator.mediaSession.playbackState=playing?'playing':'paused';
+  navigator.mediaSession.setActionHandler('pause',()=>stopPlayback());
+  navigator.mediaSession.setActionHandler('stop',()=>stopPlayback());
+  navigator.mediaSession.setActionHandler('play',()=>{if(!isPlaying)startPlayback()});
+}
+
+// ===== Two-element audio: keepAlive (silent WAV loop) + trackAudio (real content) =====
+function makeSilentWav(){
+  const sr=8000,dur=1,samples=sr*dur;
+  const buf=new ArrayBuffer(44+samples);const v=new DataView(buf);
+  function s(o,t){for(let i=0;i<t.length;i++)v.setUint8(o+i,t.charCodeAt(i))}
+  s(0,'RIFF');v.setUint32(4,36+samples,true);s(8,'WAVE');
+  s(12,'fmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);
+  v.setUint32(24,sr,true);v.setUint32(28,sr,true);v.setUint16(32,1,true);v.setUint16(34,8,true);
+  s(36,'data');v.setUint32(40,samples,true);
+  for(let i=0;i<samples;i++)v.setUint8(44+i,128);
+  return URL.createObjectURL(new Blob([buf],{type:'audio/wav'}));
+}
+const silentWavUrl=makeSilentWav();
+
+// keepAlive: plays silent WAV in loop, NEVER paused during playback session
+const keepAlive=new Audio(silentWavUrl);
+keepAlive.loop=true;keepAlive.volume=0.01;
+
+// trackAudio: plays real recorded tracks
+const trackAudio=new Audio();
+
+function startSilentAudio(){keepAlive.play().catch(()=>{})}
+function stopSilentAudio(){keepAlive.pause()}
+
+// ===== Headphone disconnect =====
+let headphonesConnected=false;
+async function checkHeadphones(){
+  try{
+    const devices=await navigator.mediaDevices.enumerateDevices();
+    headphonesConnected=devices.some(d=>d.kind==='audiooutput'&&d.deviceId!=='default'&&d.deviceId!=='communications');
+  }catch(e){headphonesConnected=false}
+}
+checkHeadphones();
+if(navigator.mediaDevices&&navigator.mediaDevices.addEventListener){
+  navigator.mediaDevices.addEventListener('devicechange',async()=>{
+    const had=headphonesConnected;
+    await checkHeadphones();
+    // Stop only if headphones were connected and now are gone
+    if(had&&!headphonesConnected&&isPlaying)stopPlayback();
+  });
+}
+
+// ===== Disclaimer =====
+const discO=document.getElementById('discOverlay');
+document.getElementById('discBtn').addEventListener('click',function(e){
+  e.preventDefault();e.stopPropagation();
+  discO.style.display='none';discO.classList.add('hidden');
+  sS('erp_disc_accepted','1');
+});
+if(sG('erp_disc_accepted'))discO.style.display='none';
+
+// ===== i18n =====
+const T={
+en:{
+  subtitle:'Audio tool for exposure exercises',
+  tabScripts:'Long Expos',tabShort:'Short Expos',
+  scriptPH:'Name (optional)',tapRec:'Tap to record',recording:'Recording... tap to stop',
+  saving:'Saving...',micDenied:'Microphone denied',
+  lbl1:'Your Expos',noScripts:'No recordings yet.',
+  wordPH:'Name (optional)',tapRecWord:'Tap to record',recordingWord:'Recording... tap to stop',savingWord:'Saving...',
+  stTitle:'Playback Settings',stInterval:'Mean interval',stVariance:'Variance',
+  lbl2:'Your Short Expos',noWords:'No recordings yet.',
+  ready:'Ready',selectPlay:'Select items and press play',
+  playing:'Playing...',
+  nextUp:'Next up...',nextIn:'Next in',noActive:'No active items',
+  renamePH:'New name',
+  discTitle:'Important Notice',
+  discP1:'<strong>ERP Loop Tape is not a medical device and does not provide therapy, diagnosis, or treatment recommendations.</strong>',
+  discP2:'This app is a simple audio tool designed to support exposure exercises. It should only be used under the guidance of a qualified mental health professional.',
+  discL1:'Not a substitute for professional treatment',discL2:'No therapeutic or medical claims are made',
+  discL3:'All data stays on your device',discL4:'Use at your own discretion and responsibility',
+  discP3:'If you are in crisis, please contact a mental health professional or emergency service immediately.',
+  discBtn:'I understand \u2014 continue',
+},
+de:{
+  subtitle:'Audio-Tool f\u00fcr Expositionen',
+  tabScripts:'Lange Expos',tabShort:'Kurz-Expos',
+  scriptPH:'Name (optional)',tapRec:'Aufnehmen',recording:'Aufnahme... tippen zum Stoppen',
+  saving:'Speichern...',micDenied:'Mikrofon verweigert',
+  lbl1:'Deine Expos',noScripts:'Noch keine Aufnahmen.',
+  wordPH:'Name (optional)',tapRecWord:'Aufnehmen',recordingWord:'Aufnahme... tippen zum Stoppen',savingWord:'Speichern...',
+  stTitle:'Wiedergabe-Einstellungen',stInterval:'Mittlerer Abstand',stVariance:'Streuung',
+  lbl2:'Deine Kurz-Expos',noWords:'Noch keine Aufnahmen.',
+  ready:'Bereit',selectPlay:'Elemente ausw\u00e4hlen und Play dr\u00fccken',
+  playing:'Wird abgespielt...',
+  nextUp:'N\u00e4chstes...',nextIn:'N\u00e4chstes in',noActive:'Keine aktiven Elemente',
+  renamePH:'Neuer Name',
+  discTitle:'Wichtiger Hinweis',
+  discP1:'<strong>ERP Loop Tape ist kein Medizinprodukt und bietet keine Therapie, Diagnose oder Behandlungsempfehlung.</strong>',
+  discP2:'Einfaches Audio-Werkzeug zur Unterst\u00fctzung von Expositions\u00fcbungen. Nur unter Anleitung einer qualifizierten Fachperson verwenden.',
+  discL1:'Kein Ersatz f\u00fcr professionelle Behandlung',discL2:'Keine therapeutischen oder medizinischen Aussagen',
+  discL3:'Alle Daten bleiben auf deinem Ger\u00e4t',discL4:'Nutzung auf eigene Verantwortung',
+  discP3:'In einer Krise wende dich sofort an eine Fachperson oder den Notdienst.',
+  discBtn:'Verstanden \u2014 weiter',
+}};
+
+let lang=sG('erp_lang')||'en';
+function t(k){return T[lang][k]||T.en[k]||k}
+
+function applyLang(){
+  sS('erp_lang',lang);
+  document.getElementById('langBtn').textContent=lang==='en'?'DE':'EN';
+  document.getElementById('subtitle').textContent=t('subtitle');
+  document.getElementById('tabScripts').textContent=t('tabScripts');
+  document.getElementById('tabShort').textContent=t('tabShort');
+  document.getElementById('scriptName').placeholder=t('scriptPH');
+  document.getElementById('recLabel').textContent=t('tapRec');
+  document.getElementById('lbl1').textContent=t('lbl1');
+  document.getElementById('scriptEmpty').textContent=t('noScripts');
+  document.getElementById('wordName').placeholder=t('wordPH');
+  document.getElementById('recWordLabel').textContent=t('tapRecWord');
+  document.getElementById('stTitle').textContent=t('stTitle');
+  document.getElementById('stInterval').textContent=t('stInterval');
+  document.getElementById('stVariance').textContent=t('stVariance');
+  document.getElementById('lbl2').textContent=t('lbl2');
+  document.getElementById('wordEmpty').textContent=t('noWords');
+  document.getElementById('playNow').textContent=t('ready');
+  document.getElementById('playSub').textContent=t('selectPlay');
+  document.getElementById('dT').textContent=t('discTitle');
+  document.getElementById('dP1').innerHTML=t('discP1');
+  document.getElementById('dP2').textContent=t('discP2');
+  document.getElementById('dL1').textContent=t('discL1');
+  document.getElementById('dL2').textContent=t('discL2');
+  document.getElementById('dL3').textContent=t('discL3');
+  document.getElementById('dL4').textContent=t('discL4');
+  document.getElementById('dP3').textContent=t('discP3');
+  document.getElementById('discBtn').textContent=t('discBtn');
+}
+
+document.getElementById('langBtn').addEventListener('click',()=>{lang=lang==='en'?'de':'en';applyLang()});
+
+// ===== Tabs =====
+let currentTab='scripts';
+document.querySelectorAll('.tab').forEach(tb=>{
+  tb.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    tb.classList.add('active');
+    currentTab=tb.dataset.tab;
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    document.getElementById('panel-'+currentTab).classList.add('active');
+  });
+});
+
+// ===== IndexedDB =====
+function openDB(){return new Promise((r,j)=>{const q=indexedDB.open('erp_audio',1);q.onupgradeneeded=()=>q.result.createObjectStore('blobs');q.onsuccess=()=>r(q.result);q.onerror=()=>j(q.error)})}
+async function saveBlob(id,blob){const db=await openDB();return new Promise((r,j)=>{const tx=db.transaction('blobs','readwrite');tx.objectStore('blobs').put(blob,id);tx.oncomplete=()=>r();tx.onerror=()=>j(tx.error)})}
+async function getBlob(id){const db=await openDB();return new Promise((r,j)=>{const tx=db.transaction('blobs','readonly');const q=tx.objectStore('blobs').get(id);q.onsuccess=()=>r(q.result);q.onerror=()=>j(q.error)})}
+async function deleteBlob(id){const db=await openDB();return new Promise(r=>{const tx=db.transaction('blobs','readwrite');tx.objectStore('blobs').delete(id);tx.oncomplete=()=>r()})}
+
+// ===== State =====
+let scripts=jG('erp_scripts_meta',[]);
+let words=jG('erp_words',[]);
+let isPlaying=false;
+let playAbort=null;
+
+// ===== Recording (Long Expos) =====
+let mediaRecorder=null,audioChunks=[];
+const recBtn=document.getElementById('recBtn'),recLabel=document.getElementById('recLabel');
+recBtn.addEventListener('click',async()=>{
+  if(mediaRecorder&&mediaRecorder.state==='recording'){mediaRecorder.stop();recBtn.classList.remove('recording');recLabel.textContent=t('saving');return}
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    audioChunks=[];mediaRecorder=new MediaRecorder(stream);
+    mediaRecorder.ondataavailable=e=>audioChunks.push(e.data);
+    mediaRecorder.onstop=async()=>{
+      stream.getTracks().forEach(tr=>tr.stop());
+      const blob=new Blob(audioChunks,{type:'audio/webm'});
+      const id='s_'+Date.now();
+      const nameEl=document.getElementById('scriptName');
+      const name=nameEl.value.trim()||((lang==='de'?'Expo ':'Expo ')+(scripts.length+1));
+      nameEl.value='';
+      scripts.push({id,name,active:true,size:blob.size});
+      await saveBlob(id,blob);jS('erp_scripts_meta',scripts);renderScripts();
+      recLabel.textContent=t('tapRec');
+    };
+    mediaRecorder.start();recBtn.classList.add('recording');recLabel.textContent=t('recording');
+  }catch(e){recLabel.textContent=t('micDenied')}
+});
+
+// ===== Render =====
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+
+function startRename(type,idx,el){
+  const arr=type==='script'?scripts:words;
+  const current=type==='script'?arr[idx].name:arr[idx].text;
+  const input=document.createElement('input');input.className='name-edit';input.value=current;input.placeholder=t('renamePH');
+  el.replaceWith(input);input.focus();input.select();
+  const commit=()=>{
+    const val=input.value.trim()||current;
+    if(type==='script'){arr[idx].name=val;jS('erp_scripts_meta',arr);renderScripts()}
+    else{arr[idx].text=val;jS('erp_words',arr);renderWords()}
+  };
+  input.addEventListener('blur',commit,{once:true});
+  input.addEventListener('keydown',e=>{if(e.key==='Enter')input.blur();if(e.key==='Escape'){input.value=current;input.blur()}});
+}
+
+function renderScripts(){
+  const list=document.getElementById('scriptList'),empty=document.getElementById('scriptEmpty');
+  list.innerHTML='';empty.style.display=scripts.length?'none':'block';
+  scripts.forEach((s,i)=>{
+    const c=document.createElement('div');c.className='item-card';
+    c.innerHTML='<div class="info"><div class="name" data-i="'+i+'">'+esc(s.name)+'</div><div class="meta">'+(s.size/1024).toFixed(0)+' KB</div></div><button class="icon-btn prev" data-i="'+i+'">&#128266;</button><button class="toggle '+(s.active?'on':'')+'" data-i="'+i+'" data-t="script"></button><button class="icon-btn danger del" data-i="'+i+'">&#10005;</button>';
+    list.appendChild(c);
+  });
+  list.querySelectorAll('.name[data-i]').forEach(el=>el.addEventListener('click',()=>startRename('script',+el.dataset.i,el)));
+  list.querySelectorAll('.toggle[data-t=script]').forEach(b=>b.addEventListener('click',()=>{scripts[+b.dataset.i].active=!scripts[+b.dataset.i].active;jS('erp_scripts_meta',scripts);renderScripts()}));
+  list.querySelectorAll('.del').forEach(b=>b.addEventListener('click',async()=>{await deleteBlob(scripts[+b.dataset.i].id);scripts.splice(+b.dataset.i,1);jS('erp_scripts_meta',scripts);renderScripts()}));
+  list.querySelectorAll('.prev').forEach(b=>b.addEventListener('click',async()=>{const blob=await getBlob(scripts[+b.dataset.i].id);if(blob){const u=URL.createObjectURL(blob);const a=new Audio(u);a.play();a.onended=()=>URL.revokeObjectURL(u)}}));
+}
+
+function renderWords(){
+  const list=document.getElementById('wordList'),empty=document.getElementById('wordEmpty');
+  list.innerHTML='';empty.style.display=words.length?'none':'block';
+  words.forEach((w,i)=>{
+    const c=document.createElement('div');c.className='item-card';
+    c.innerHTML='<div class="info"><div class="name" data-i="'+i+'">'+esc(w.text)+'</div><div class="meta">'+(w.size?(w.size/1024).toFixed(0)+' KB':'')+'</div></div><button class="icon-btn prev" data-i="'+i+'">&#128266;</button><button class="toggle '+(w.active?'on':'')+'" data-i="'+i+'" data-t="word"></button><button class="icon-btn danger del" data-i="'+i+'">&#10005;</button>';
+    list.appendChild(c);
+  });
+  list.querySelectorAll('.name[data-i]').forEach(el=>el.addEventListener('click',()=>startRename('word',+el.dataset.i,el)));
+  list.querySelectorAll('.toggle[data-t=word]').forEach(b=>b.addEventListener('click',()=>{words[+b.dataset.i].active=!words[+b.dataset.i].active;jS('erp_words',words);renderWords()}));
+  list.querySelectorAll('.del').forEach(b=>b.addEventListener('click',async()=>{if(words[+b.dataset.i].id)await deleteBlob(words[+b.dataset.i].id);words.splice(+b.dataset.i,1);jS('erp_words',words);renderWords()}));
+  list.querySelectorAll('.prev').forEach(b=>b.addEventListener('click',async()=>{const w=words[+b.dataset.i];if(w.id){const blob=await getBlob(w.id);if(blob){const u=URL.createObjectURL(blob);const a=new Audio(u);a.play();a.onended=()=>URL.revokeObjectURL(u)}}}));
+}
+
+// ===== Record Short Expos =====
+let wordRecorder=null,wordChunks=[];
+const recWordBtn=document.getElementById('recWordBtn'),recWordLabel=document.getElementById('recWordLabel');
+recWordBtn.addEventListener('click',async()=>{
+  if(wordRecorder&&wordRecorder.state==='recording'){wordRecorder.stop();recWordBtn.classList.remove('recording');recWordLabel.textContent=t('savingWord');return}
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    wordChunks=[];wordRecorder=new MediaRecorder(stream);
+    wordRecorder.ondataavailable=e=>wordChunks.push(e.data);
+    wordRecorder.onstop=async()=>{
+      stream.getTracks().forEach(tr=>tr.stop());
+      const blob=new Blob(wordChunks,{type:'audio/webm'});
+      const id='w_'+Date.now();
+      const nameEl=document.getElementById('wordName');
+      const name=nameEl.value.trim()||('Snippet '+(words.length+1));
+      nameEl.value='';
+      words.push({id,text:name,active:true,size:blob.size});
+      await saveBlob(id,blob);jS('erp_words',words);renderWords();
+      recWordLabel.textContent=t('tapRecWord');
+    };
+    wordRecorder.start();recWordBtn.classList.add('recording');recWordLabel.textContent=t('recordingWord');
+  }catch(e){recWordLabel.textContent=t('micDenied')}
+});
+
+// ===== Interval =====
+const slider=document.getElementById('intervalSlider'),intervalVal=document.getElementById('intervalVal');
+function fmtTime(s){if(s<60)return s+'s';if(s<3600)return Math.floor(s/60)+'m '+(s%60)+'s';return'1h'}
+slider.addEventListener('input',()=>{intervalVal.textContent=fmtTime(+slider.value)});
+const varianceSlider=document.getElementById('varianceSlider'),varianceVal=document.getElementById('varianceVal');
+varianceSlider.addEventListener('input',()=>{varianceVal.textContent='\u00b1'+varianceSlider.value+'%'});
+
+// ===== Playback =====
+const playBtn=document.getElementById('playBtn'),playNow=document.getElementById('playNow'),playSub=document.getElementById('playSub');
+playBtn.addEventListener('click',()=>{isPlaying?stopPlayback():startPlayback()});
+
+function stopPlayback(){
+  isPlaying=false;
+  if(playAbort)playAbort.abort();
+  trackAudio.pause();trackAudio.removeAttribute('src');
+  playBtn.textContent='\u25b6';playBtn.classList.remove('stop');
+  playNow.textContent=t('ready');playSub.textContent=t('selectPlay');
+  releaseWake();stopSilentAudio();
+  if('mediaSession' in navigator)navigator.mediaSession.playbackState='none';
+}
+
+function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]]}return b}
+
+async function startPlayback(){
+  const ctrl=new AbortController();playAbort=ctrl;isPlaying=true;
+  playBtn.textContent='\u25a0';playBtn.classList.add('stop');
+  await requestWake();startSilentAudio();
+  await checkHeadphones();
+  if(currentTab==='scripts')await loopScripts(ctrl.signal);
+  else await loopWords(ctrl.signal);
+  if(isPlaying)stopPlayback();
+}
+
+async function loopScripts(sig){
+  const act=scripts.filter(s=>s.active);
+  if(!act.length){playNow.textContent=t('noActive');return}
+  while(!sig.aborted){
+    const order=shuffle(act);
+    for(let i=0;i<order.length;i++){
+      if(sig.aborted)return;
+      const s=order[i];
+      playNow.textContent=s.name;playSub.textContent=t('playing');
+      setMediaSession(s.name,true);
+      const blob=await getBlob(s.id);if(!blob)continue;
+      await playAudio(blob,sig);
+      if(sig.aborted)return;
+      // Brief pause between tracks
+      playSub.textContent=t('nextUp');
+      await wait(1500,sig);
+    }
+  }
+}
+
+function playAudio(blob,sig){
+  return new Promise(r=>{
+    if(sig.aborted){r();return}
+    const u=URL.createObjectURL(blob);
+    let resolved=false;
+    const done=()=>{if(resolved)return;resolved=true;URL.revokeObjectURL(u);r()};
+    const onAbort=()=>{trackAudio.pause();done()};
+    sig.addEventListener('abort',onAbort,{once:true});
+    trackAudio.onended=()=>{sig.removeEventListener('abort',onAbort);done()};
+    trackAudio.onerror=()=>{sig.removeEventListener('abort',onAbort);done()};
+    trackAudio.src=u;
+    trackAudio.play().catch(()=>{
+      // If play() fails (e.g. display just turned off), retry once after short delay
+      setTimeout(()=>{if(!sig.aborted)trackAudio.play().catch(()=>done())},500);
+    });
+  });
+}
+
+async function loopWords(sig){
+  const act=words.filter(w=>w.active&&w.id);
+  if(!act.length){playNow.textContent=t('noActive');return}
+  while(!sig.aborted){
+    const order=shuffle(act);
+    for(let i=0;i<order.length;i++){
+      if(sig.aborted)return;
+      const w=order[i];
+      playNow.textContent=w.text;playSub.textContent=t('playing');
+      setMediaSession(w.text,true);
+      const blob=await getBlob(w.id);if(!blob)continue;
+      await playAudio(blob,sig);
+      if(sig.aborted)return;
+      let iv=+slider.value;
+      const vPct=+varianceSlider.value/100;
+      if(vPct>0){const lo=iv*(1-vPct);const hi=iv*(1+vPct);iv=Math.round(lo+Math.random()*(hi-lo))}
+      iv=Math.max(1,Math.min(3600,iv));
+      playSub.textContent=t('nextIn')+' '+fmtTime(iv);
+      playNow.textContent='\u2026';
+      await countdown(iv,sig);
+    }
+  }
+}
+
+function wait(ms,sig){return new Promise(r=>{if(sig.aborted){r();return}const tm=setTimeout(r,ms);sig.addEventListener('abort',()=>{clearTimeout(tm);r()},{once:true})})}
+
+function countdown(sec,sig){
+  return new Promise(r=>{
+    if(sig.aborted){r();return}
+    let rem=sec;let timer;
+    const tick=()=>{if(sig.aborted||rem<=0){r();return}playSub.textContent=t('nextIn')+' '+fmtTime(rem);rem--;timer=setTimeout(tick,1000)};
+    tick();sig.addEventListener('abort',()=>{clearTimeout(timer);r()},{once:true});
+  });
+}
+
+// ===== Init =====
+applyLang();renderScripts();renderWords();
+</script>
+</body>
+</html>

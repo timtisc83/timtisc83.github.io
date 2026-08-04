@@ -1,0 +1,30 @@
+{
+  "id": "/",
+  "name": "ERP Loop Tape",
+  "short_name": "ERP Loop Tape",
+  "description": "Record and loop exposure scripts for ERP therapy. Local, private, simple.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f7f7fa",
+  "theme_color": "#f7f7fa",
+  "orientation": "portrait",
+  "lang": "en",
+  "dir": "ltr",
+  "categories": ["health", "lifestyle"],
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": []
+}
