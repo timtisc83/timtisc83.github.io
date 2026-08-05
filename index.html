@@ -111,7 +111,7 @@ input:focus,button:focus-visible{outline:2px solid var(--accent);outline-offset:
 <header>
   <div style="width:48px"></div>
   <div class="title">
-    <h1>ERP Loop Tape <span class="bg-badge" id="bgBadge">BG</span></h1>
+    <h1>ERP Loop Tape <span class="bg-badge" id="bgBadge">&#9654; aktiv</span></h1>
     <p id="subtitle">Audio tool for exposure exercises</p>
   </div>
   <button class="lang-btn" id="langBtn">DE</button>
@@ -128,6 +128,14 @@ input:focus,button:focus-visible{outline:2px solid var(--accent);outline-offset:
     <button class="rec-btn" id="recBtn"><span class="dot"></span></button>
     <span class="rec-label" id="recLabel">Tap to record</span>
   </div>
+  <div class="settings-section">
+    <h3 id="stTimerLong">Timer</h3>
+    <div class="setting-row"><label id="stTimerLabelLong">Stop after</label></div>
+    <div class="setting-row">
+      <input type="range" id="timerSliderLong" min="0" max="18" value="0">
+      <span class="val" id="timerValLong">Off</span>
+    </div>
+  </div>
   <div class="section-label" id="lbl1">Your Expos</div>
   <div class="item-list" id="scriptList"></div>
   <div class="empty" id="scriptEmpty">No recordings yet.</div>
@@ -143,13 +151,21 @@ input:focus,button:focus-visible{outline:2px solid var(--accent);outline-offset:
     <h3 id="stTitle">Playback Settings</h3>
     <div class="setting-row"><label id="stInterval">Mean interval</label></div>
     <div class="setting-row">
-      <input type="range" id="intervalSlider" min="1" max="3600" value="10">
+      <input type="range" id="intervalSlider" min="0" max="20" value="1">
       <span class="val" id="intervalVal">10s</span>
     </div>
     <div class="setting-row"><label id="stVariance">Variance</label></div>
     <div class="setting-row">
       <input type="range" id="varianceSlider" min="0" max="50" value="25">
       <span class="val" id="varianceVal">&plusmn;25%</span>
+    </div>
+  </div>
+  <div class="settings-section">
+    <h3 id="stTimer">Timer</h3>
+    <div class="setting-row"><label id="stTimerLabel">Stop after</label></div>
+    <div class="setting-row">
+      <input type="range" id="timerSlider" min="0" max="18" value="0">
+      <span class="val" id="timerVal">Off</span>
     </div>
   </div>
   <div class="section-label" id="lbl2">Your Short Expos</div>
@@ -259,6 +275,7 @@ en:{
   lbl1:'Your Expos',noScripts:'No recordings yet.',
   wordPH:'Name (optional)',tapRecWord:'Tap to record',recordingWord:'Recording... tap to stop',savingWord:'Saving...',
   stTitle:'Playback Settings',stInterval:'Mean interval',stVariance:'Variance',
+  stTimer:'Timer',stTimerLabel:'Stop after',timerOff:'Off',
   lbl2:'Your Short Expos',noWords:'No recordings yet.',
   ready:'Ready',selectPlay:'Select items and press play',
   playing:'Playing...',
@@ -280,6 +297,7 @@ de:{
   lbl1:'Deine Expos',noScripts:'Noch keine Aufnahmen.',
   wordPH:'Name (optional)',tapRecWord:'Aufnehmen',recordingWord:'Aufnahme... tippen zum Stoppen',savingWord:'Speichern...',
   stTitle:'Wiedergabe-Einstellungen',stInterval:'Mittlerer Abstand',stVariance:'Streuung',
+  stTimer:'Timer',stTimerLabel:'Stoppen nach',timerOff:'Aus',
   lbl2:'Deine Kurz-Expos',noWords:'Noch keine Aufnahmen.',
   ready:'Bereit',selectPlay:'Elemente ausw\u00e4hlen und Play dr\u00fccken',
   playing:'Wird abgespielt...',
@@ -312,6 +330,12 @@ function applyLang(){
   document.getElementById('stTitle').textContent=t('stTitle');
   document.getElementById('stInterval').textContent=t('stInterval');
   document.getElementById('stVariance').textContent=t('stVariance');
+  document.getElementById('stTimer').textContent=t('stTimer');
+  document.getElementById('stTimerLabel').textContent=t('stTimerLabel');
+  document.getElementById('stTimerLong').textContent=t('stTimer');
+  document.getElementById('stTimerLabelLong').textContent=t('stTimerLabel');
+  timerVal.textContent=timerLabel(TIMER_STEPS[+timerSlider.value]);
+  timerValLong.textContent=timerLabel(TIMER_STEPS[+timerSliderLong.value]);
   document.getElementById('lbl2').textContent=t('lbl2');
   document.getElementById('wordEmpty').textContent=t('noWords');
   document.getElementById('playNow').textContent=t('ready');
@@ -446,12 +470,48 @@ recWordBtn.addEventListener('click',async()=>{
   }catch(e){recWordLabel.textContent=t('micDenied')}
 });
 
-// ===== Interval =====
+// ===== Non-linear interval slider =====
+// 0-100 slider maps to seconds: 0-60 in 10s steps, 60-600 in 60s steps, 600-3600 in 600s steps
 const slider=document.getElementById('intervalSlider'),intervalVal=document.getElementById('intervalVal');
-function fmtTime(s){if(s<60)return s+'s';if(s<3600)return Math.floor(s/60)+'m '+(s%60)+'s';return'1h'}
-slider.addEventListener('input',()=>{intervalVal.textContent=fmtTime(+slider.value)});
+function sliderToSeconds(v){
+  v=+v;
+  if(v<=6) return v*10;          // 0-60s in 10s steps (slider 0-6)
+  if(v<=15) return 60+(v-6)*60;  // 1m-10m in 1m steps (slider 7-15)
+  return Math.min(3600,600+(v-15)*600); // 10m-60m in 10m steps (slider 16-20)
+}
+function fmtTime(s){
+  if(s<=0)return '0s';
+  if(s<60)return s+'s';
+  if(s<3600){const m=Math.floor(s/60);const r=s%60;return r?m+'m '+r+'s':m+'m'}
+  return '1h';
+}
+function updateIntervalDisplay(){intervalVal.textContent=fmtTime(sliderToSeconds(slider.value))}
+slider.addEventListener('input',updateIntervalDisplay);
+updateIntervalDisplay();
+
 const varianceSlider=document.getElementById('varianceSlider'),varianceVal=document.getElementById('varianceVal');
 varianceSlider.addEventListener('input',()=>{varianceVal.textContent='\u00b1'+varianceSlider.value+'%'});
+
+// ===== Timer slider (non-linear: 0=off, then 5,10,15,20,30,45,60,90,120 min) =====
+const TIMER_STEPS=[0,5,10,15,20,25,30,45,60,90,120,150,180,210,240,270,300,330,360];
+function timerLabel(mins){
+  if(mins===0) return lang==='de'?'Aus':'Off';
+  if(mins<60) return mins+' min';
+  const h=Math.floor(mins/60);const m=mins%60;
+  return m?h+'h '+m+'m':h+'h';
+}
+
+const timerSlider=document.getElementById('timerSlider'),timerVal=document.getElementById('timerVal');
+timerSlider.addEventListener('input',()=>{timerVal.textContent=timerLabel(TIMER_STEPS[+timerSlider.value])});
+
+const timerSliderLong=document.getElementById('timerSliderLong'),timerValLong=document.getElementById('timerValLong');
+timerSliderLong.addEventListener('input',()=>{timerValLong.textContent=timerLabel(TIMER_STEPS[+timerSliderLong.value])});
+
+function getTimerMs(){
+  const sl=currentTab==='scripts'?timerSliderLong:timerSlider;
+  const mins=TIMER_STEPS[+sl.value];
+  return mins>0?mins*60*1000:0;
+}
 
 // ===== Playback =====
 const playBtn=document.getElementById('playBtn'),playNow=document.getElementById('playNow'),playSub=document.getElementById('playSub');
@@ -474,8 +534,13 @@ async function startPlayback(){
   playBtn.textContent='\u25a0';playBtn.classList.add('stop');
   await requestWake();startSilentAudio();
   await checkHeadphones();
+  // Timer: auto-stop after X minutes
+  const tMs=getTimerMs();
+  let timerTimeout=null;
+  if(tMs>0){timerTimeout=setTimeout(()=>{if(isPlaying)stopPlayback()},tMs)}
   if(currentTab==='scripts')await loopScripts(ctrl.signal);
   else await loopWords(ctrl.signal);
+  if(timerTimeout)clearTimeout(timerTimeout);
   if(isPlaying)stopPlayback();
 }
 
@@ -530,7 +595,7 @@ async function loopWords(sig){
       const blob=await getBlob(w.id);if(!blob)continue;
       await playAudio(blob,sig);
       if(sig.aborted)return;
-      let iv=+slider.value;
+      let iv=sliderToSeconds(slider.value);
       const vPct=+varianceSlider.value/100;
       if(vPct>0){const lo=iv*(1-vPct);const hi=iv*(1+vPct);iv=Math.round(lo+Math.random()*(hi-lo))}
       iv=Math.max(1,Math.min(3600,iv));
@@ -541,14 +606,46 @@ async function loopWords(sig){
   }
 }
 
-function wait(ms,sig){return new Promise(r=>{if(sig.aborted){r();return}const tm=setTimeout(r,ms);sig.addEventListener('abort',()=>{clearTimeout(tm);r()},{once:true})})}
+function wait(ms,sig){
+  return new Promise(r=>{
+    if(sig.aborted){r();return}
+    const endTime=Date.now()+ms;
+    let tm;
+    const check=()=>{
+      if(sig.aborted){r();return}
+      if(Date.now()>=endTime){r();return}
+      tm=setTimeout(check,Math.min(endTime-Date.now(),5000));
+    };
+    tm=setTimeout(check,ms);
+    sig.addEventListener('abort',()=>{clearTimeout(tm);r()},{once:true});
+    const onVis=()=>{if(document.visibilityState==='visible'){clearTimeout(tm);check()}};
+    document.addEventListener('visibilitychange',onVis);
+    const origR=r;
+    r=()=>{document.removeEventListener('visibilitychange',onVis);origR()};
+  });
+}
 
 function countdown(sec,sig){
   return new Promise(r=>{
     if(sig.aborted){r();return}
-    let rem=sec;let timer;
-    const tick=()=>{if(sig.aborted||rem<=0){r();return}playSub.textContent=t('nextIn')+' '+fmtTime(rem);rem--;timer=setTimeout(tick,1000)};
-    tick();sig.addEventListener('abort',()=>{clearTimeout(timer);r()},{once:true});
+    const endTime=Date.now()+sec*1000;
+    let timer;
+    const tick=()=>{
+      if(sig.aborted){r();return}
+      const rem=Math.ceil((endTime-Date.now())/1000);
+      if(rem<=0){r();return}
+      playSub.textContent=t('nextIn')+' '+fmtTime(rem);
+      // Use short interval to catch up quickly after display wakes
+      timer=setTimeout(tick,rem>10?5000:1000);
+    };
+    tick();
+    sig.addEventListener('abort',()=>{clearTimeout(timer);r()},{once:true});
+    // Also listen for visibility change to immediately re-check
+    const onVisible=()=>{if(document.visibilityState==='visible'){clearTimeout(timer);tick()}};
+    document.addEventListener('visibilitychange',onVisible);
+    // Clean up visibility listener when done
+    const origR=r;
+    r=()=>{document.removeEventListener('visibilitychange',onVisible);origR()};
   });
 }
 
