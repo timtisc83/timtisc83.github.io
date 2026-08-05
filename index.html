@@ -36,6 +36,18 @@ header p{font-size:11px;color:var(--text2);margin-top:1px}
 .disc-box ul li{margin-bottom:4px}
 .disc-accept{width:100%;padding:14px;border:none;border-radius:10px;background:var(--green);color:#fff;font-size:15px;font-weight:700;cursor:pointer;margin-top:8px;-webkit-appearance:none;touch-action:manipulation}
 
+
+.info-box{margin:0 0 10px;background:var(--surface);border:1px solid var(--surface2);border-radius:var(--radius);overflow:hidden}
+.info-toggle{display:flex;align-items:center;gap:8px;padding:12px 16px;cursor:pointer;font-size:13px;font-weight:600;color:var(--text2)}
+.info-icon{font-size:18px;color:var(--accent)}
+.info-arrow{margin-left:auto;font-size:10px;transition:transform .2s}
+.info-arrow.open{transform:rotate(180deg)}
+.info-content{padding:0 16px 14px;font-size:13px;line-height:1.6;color:var(--text2)}
+.info-content p{margin-bottom:8px}
+.info-content ol{margin:8px 0 12px 20px}
+.info-content ol li{margin-bottom:4px}
+.info-content em{font-style:italic}
+.info-source{font-size:11px;color:var(--text2);opacity:.7;margin-top:8px}
 .tabs{display:flex;margin:10px 20px 0;background:var(--surface);border-radius:var(--radius);overflow:hidden;border:1px solid var(--surface2)}
 .tab{flex:1;padding:10px;text-align:center;font-size:13px;font-weight:600;cursor:pointer;color:var(--text2);border:none;background:transparent;transition:background .2s}
 .tab.active{background:var(--accent);color:#fff}
@@ -128,6 +140,26 @@ input:focus,button:focus-visible{outline:2px solid var(--accent);outline-offset:
     <button class="rec-btn" id="recBtn"><span class="dot"></span></button>
     <span class="rec-label" id="recLabel">Tap to record</span>
   </div>
+  <div class="info-box" id="longExpoInfo">
+    <div class="info-toggle" id="infoToggleLong">
+      <span class="info-icon">&#9432;</span>
+      <span id="infoToggleLabelLong">How to use long exposures</span>
+      <span class="info-arrow" id="infoArrowLong">&#9660;</span>
+    </div>
+    <div class="info-content" id="infoContentLong" style="display:none">
+      <p>Record a spoken exposure script that describes your feared scenario in detail. Speak slowly and include the sensory and emotional details of your fear. Key points:</p>
+      <ul>
+        <li>Write your script before recording. Include your worst-case scenario and how it would make you feel.</li>
+        <li>Use present tense and first person (“I am touching the doorknob and I feel contaminated…”).</li>
+        <li>The script should provoke moderate to high anxiety (SUDS 50–80).</li>
+        <li>Listen to the recording on a loop while resisting the urge to ritualize.</li>
+        <li>Continue until your anxiety drops significantly (typically 45–90 minutes).</li>
+        <li>Repeat daily. Over time, the recording will provoke less anxiety.</li>
+      </ul>
+      <p>The goal is habituation: by staying with the anxiety without ritualizing, your brain learns that the feared outcome does not occur and that you can tolerate the distress.</p>
+      <p class="info-source">Based on: Grayson, J. (2014). <em>Freedom from Obsessive-Compulsive Disorder</em>, Ch. 6–7.</p>
+    </div>
+  </div>
   <div class="settings-section">
     <h3 id="stTimerLong">Timer</h3>
     <div class="setting-row"><label id="stTimerLabelLong">Stop after</label></div>
@@ -146,6 +178,26 @@ input:focus,button:focus-visible{outline:2px solid var(--accent);outline-offset:
     <input class="name-input" id="wordName" placeholder="Name (optional)">
     <button class="rec-btn" id="recWordBtn"><span class="dot"></span></button>
     <span class="rec-label" id="recWordLabel">Tap to record</span>
+  </div>
+<div class="info-box" id="shortExpoInfo">
+    <div class="info-toggle" id="infoToggle">
+      <span class="info-icon">&#9432;</span>
+      <span id="infoToggleLabel">How to use short exposures</span>
+      <span class="info-arrow" id="infoArrow">&#9660;</span>
+    </div>
+    <div class="info-content" id="infoContent" style="display:none">
+      <p>Record a single word or short phrase related to your fear (e.g. a trigger word). Then loop it using these recommended intervals:</p>
+      <ol>
+        <li>Say the word.</li>
+        <li>Wait 30–40 seconds.</li>
+        <li>Repeat the word.</li>
+        <li>Wait 50–70 seconds.</li>
+        <li>Repeat the word.</li>
+        <li>Wait 20–40 seconds.</li>
+      </ol>
+      <p>Listening to this recording while delaying your urges to ritualize is an exposure-and-response-prevention exercise. The goal is <em>not</em> to distract yourself or control your thoughts — it is to keep the feared thought in the foreground without ritualizing.</p>
+      <p class="info-source">Based on: Grayson, J. (2014). <em>Freedom from Obsessive-Compulsive Disorder</em>, Ch. 7.</p>
+    </div>
   </div>
   <div class="settings-section">
     <h3 id="stTitle">Playback Settings</h3>
@@ -272,11 +324,26 @@ en:{
   tabScripts:'Long Expos',tabShort:'Short Expos',
   scriptPH:'Name (optional)',tapRec:'Tap to record',recording:'Recording... tap to stop',
   saving:'Saving...',micDenied:'Microphone denied',
-  lbl1:'Your Expos',noScripts:'No recordings yet.',
+  lbl1:'Your Expos',
+  infoToggleLabelLong:'How to use long exposures',
+  infoLongP1:'Record a spoken exposure script that describes your feared scenario in detail. Speak slowly and include the sensory and emotional details of your fear. Key points:',
+  infoLongL1:'Write your script before recording. Include your worst-case scenario and how it would make you feel.',
+  infoLongL2:'Use present tense and first person (\u201cI am touching the doorknob and I feel contaminated\u2026\u201d).',
+  infoLongL3:'The script should provoke moderate to high anxiety (SUDS 50\u201380).',
+  infoLongL4:'Listen to the recording on a loop while resisting the urge to ritualize.',
+  infoLongL5:'Continue until your anxiety drops significantly (typically 45\u201390 minutes).',
+  infoLongL6:'Repeat daily. Over time, the recording will provoke less anxiety.',
+  infoLongP2:'The goal is habituation: by staying with the anxiety without ritualizing, your brain learns that the feared outcome does not occur and that you can tolerate the distress.',
+  infoLongSource:'Based on: Grayson, J. (2014). Freedom from Obsessive-Compulsive Disorder, Ch. 6\u20137.',noScripts:'No recordings yet.',
   wordPH:'Name (optional)',tapRecWord:'Tap to record',recordingWord:'Recording... tap to stop',savingWord:'Saving...',
   stTitle:'Playback Settings',stInterval:'Mean interval',stVariance:'Variance',
   stTimer:'Timer',stTimerLabel:'Stop after',timerOff:'Off',
-  lbl2:'Your Short Expos',noWords:'No recordings yet.',
+  lbl2:'Your Short Expos',
+  infoToggleLabel:'How to use short exposures',
+  infoP1:'Record a single word or short phrase related to your fear (e.g. a trigger word). Then loop it using these recommended intervals:',
+  infoL1:'Say the word.',infoL2:'Wait 30\u201340 seconds.',infoL3:'Repeat the word.',infoL4:'Wait 50\u201370 seconds.',infoL5:'Repeat the word.',infoL6:'Wait 20\u201340 seconds.',
+  infoP2:'Listening to this recording while delaying your urges to ritualize is an exposure-and-response-prevention exercise. The goal is not to distract yourself or control your thoughts \u2014 it is to keep the feared thought in the foreground without ritualizing.',
+  infoSource:'Based on: Grayson, J. (2014). Freedom from Obsessive-Compulsive Disorder, Ch. 7.',noWords:'No recordings yet.',
   ready:'Ready',selectPlay:'Select items and press play',
   playing:'Playing...',
   nextUp:'Next up...',nextIn:'Next in',noActive:'No active items',
@@ -294,11 +361,26 @@ de:{
   tabScripts:'Lange Expos',tabShort:'Kurz-Expos',
   scriptPH:'Name (optional)',tapRec:'Aufnehmen',recording:'Aufnahme... tippen zum Stoppen',
   saving:'Speichern...',micDenied:'Mikrofon verweigert',
-  lbl1:'Deine Expos',noScripts:'Noch keine Aufnahmen.',
+  lbl1:'Deine Expos',
+  infoToggleLabelLong:'So funktionieren lange Expositionen',
+  infoLongP1:'Nimm ein gesprochenes Expositionsskript auf, das dein bef\u00fcrchtetes Szenario detailliert beschreibt. Sprich langsam und beschreibe die sensorischen und emotionalen Details deiner Angst. Wichtige Punkte:',
+  infoLongL1:'Schreibe dein Skript vor der Aufnahme. Beschreibe dein Worst-Case-Szenario und wie es sich anf\u00fchlen w\u00fcrde.',
+  infoLongL2:'Verwende Gegenwartsform und erste Person (\u201eIch ber\u00fchre die T\u00fcrklinke und f\u00fchle mich kontaminiert\u2026\u201c).',
+  infoLongL3:'Das Skript sollte mittlere bis hohe Angst ausl\u00f6sen (SUDS 50\u201380).',
+  infoLongL4:'H\u00f6re die Aufnahme in Schleife, w\u00e4hrend du den Drang zum Ritualisieren widerst\u00e4ndst.',
+  infoLongL5:'Fahre fort, bis deine Angst deutlich nachl\u00e4sst (typischerweise 45\u201390 Minuten).',
+  infoLongL6:'Wiederhole t\u00e4glich. Mit der Zeit wird die Aufnahme weniger Angst ausl\u00f6sen.',
+  infoLongP2:'Das Ziel ist Habituation: Indem du bei der Angst bleibst, ohne zu ritualisieren, lernt dein Gehirn, dass das bef\u00fcrchtete Ergebnis nicht eintritt und dass du die Belastung aushalten kannst.',
+  infoLongSource:'Basierend auf: Grayson, J. (2014). Freedom from Obsessive-Compulsive Disorder, Kap. 6\u20137.',noScripts:'Noch keine Aufnahmen.',
   wordPH:'Name (optional)',tapRecWord:'Aufnehmen',recordingWord:'Aufnahme... tippen zum Stoppen',savingWord:'Speichern...',
   stTitle:'Wiedergabe-Einstellungen',stInterval:'Mittlerer Abstand',stVariance:'Streuung',
   stTimer:'Timer',stTimerLabel:'Stoppen nach',timerOff:'Aus',
-  lbl2:'Deine Kurz-Expos',noWords:'Noch keine Aufnahmen.',
+  lbl2:'Deine Kurz-Expos',
+  infoToggleLabel:'So funktionieren Kurz-Expositionen',
+  infoP1:'Nimm ein einzelnes Wort oder eine kurze Phrase auf, die mit deiner Angst zusammenh\u00e4ngt (z.B. ein Triggerwort). Dann loope es mit diesen empfohlenen Intervallen:',
+  infoL1:'Sag das Wort.',infoL2:'Warte 30\u201340 Sekunden.',infoL3:'Wiederhole das Wort.',infoL4:'Warte 50\u201370 Sekunden.',infoL5:'Wiederhole das Wort.',infoL6:'Warte 20\u201340 Sekunden.',
+  infoP2:'Das Anh\u00f6ren dieser Aufnahme, w\u00e4hrend du den Drang zum Ritualisieren verz\u00f6gerst, ist eine Expositions\u00fcbung mit Reaktionsverhinderung. Ziel ist es nicht, dich abzulenken oder deine Gedanken zu kontrollieren \u2014 sondern den gef\u00fcrchteten Gedanken im Vordergrund zu halten, ohne zu ritualisieren.',
+  infoSource:'Basierend auf: Grayson, J. (2014). Freedom from Obsessive-Compulsive Disorder, Kap. 7.',noWords:'Noch keine Aufnahmen.',
   ready:'Bereit',selectPlay:'Elemente ausw\u00e4hlen und Play dr\u00fccken',
   playing:'Wird abgespielt...',
   nextUp:'N\u00e4chstes...',nextIn:'N\u00e4chstes in',noActive:'Keine aktiven Elemente',
@@ -324,6 +406,9 @@ function applyLang(){
   document.getElementById('scriptName').placeholder=t('scriptPH');
   document.getElementById('recLabel').textContent=t('tapRec');
   document.getElementById('lbl1').textContent=t('lbl1');
+  document.getElementById('infoToggleLabelLong').textContent=t('infoToggleLabelLong');
+  const icl=document.getElementById('infoContentLong');
+  if(icl){icl.innerHTML='<p>'+t('infoLongP1')+'</p><ul><li>'+t('infoLongL1')+'</li><li>'+t('infoLongL2')+'</li><li>'+t('infoLongL3')+'</li><li>'+t('infoLongL4')+'</li><li>'+t('infoLongL5')+'</li><li>'+t('infoLongL6')+'</li></ul><p>'+t('infoLongP2')+'</p><p class="info-source"><em>'+t('infoLongSource')+'</em></p>'}
   document.getElementById('scriptEmpty').textContent=t('noScripts');
   document.getElementById('wordName').placeholder=t('wordPH');
   document.getElementById('recWordLabel').textContent=t('tapRecWord');
@@ -337,6 +422,10 @@ function applyLang(){
   timerVal.textContent=timerLabel(TIMER_STEPS[+timerSlider.value]);
   timerValLong.textContent=timerLabel(TIMER_STEPS[+timerSliderLong.value]);
   document.getElementById('lbl2').textContent=t('lbl2');
+  document.getElementById('infoToggleLabel').textContent=t('infoToggleLabel');
+  // Update info content
+  const ic=document.getElementById('infoContent');
+  if(ic){ic.innerHTML='<p>'+t('infoP1')+'</p><ol><li>'+t('infoL1')+'</li><li>'+t('infoL2')+'</li><li>'+t('infoL3')+'</li><li>'+t('infoL4')+'</li><li>'+t('infoL5')+'</li><li>'+t('infoL6')+'</li></ol><p>'+t('infoP2')+'</p><p class="info-source">'+t('infoSource')+'</p>'}
   document.getElementById('wordEmpty').textContent=t('noWords');
   document.getElementById('playNow').textContent=t('ready');
   document.getElementById('playSub').textContent=t('selectPlay');
@@ -351,6 +440,21 @@ function applyLang(){
   document.getElementById('discBtn').textContent=t('discBtn');
 }
 
+
+// ===== Info box toggle =====
+
+document.getElementById('infoToggleLong').addEventListener('click',()=>{
+  const c=document.getElementById('infoContentLong');
+  const a=document.getElementById('infoArrowLong');
+  if(c.style.display==='none'){c.style.display='block';a.classList.add('open')}
+  else{c.style.display='none';a.classList.remove('open')}
+});
+document.getElementById('infoToggle').addEventListener('click',()=>{
+  const c=document.getElementById('infoContent');
+  const a=document.getElementById('infoArrow');
+  if(c.style.display==='none'){c.style.display='block';a.classList.add('open')}
+  else{c.style.display='none';a.classList.remove('open')}
+});
 document.getElementById('langBtn').addEventListener('click',()=>{lang=lang==='en'?'de':'en';applyLang()});
 
 // ===== Tabs =====
